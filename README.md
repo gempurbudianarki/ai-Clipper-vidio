@@ -1,10 +1,4 @@
-mantap, ini **versi README.md yang sudah gue poles ulang**:
-lebih **rapi**, **developer-grade**, **jelas buat orang baru**, **jelas soal FFmpeg**, dan **enak dipamerin di GitHub**.
-Lo **tinggal copy–paste**, gak perlu mikir lagi.
 
----
-
-# ✅ `README.md` — FINAL VERSION (SIAP COMMIT)
 
 ```md
 <div align="center">
