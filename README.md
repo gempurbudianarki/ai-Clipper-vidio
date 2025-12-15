@@ -115,7 +115,7 @@ ai-video-editor/
 
 ### 1️⃣ Clone Repository
 ```bash
-git clone https://github.com/USERNAME/ai-video-editor.git
+git clone https://github.com/gempurbudianarki/ai-Clipper-vidio.git
 cd ai-video-editor
 ````
 
