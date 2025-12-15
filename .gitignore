@@ -1,0 +1,58 @@
+# =========================
+# PYTHON / VENV
+# =========================
+venv/
+.env
+.env.*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# =========================
+# OS / EDITOR JUNK
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# =========================
+# LOGS
+# =========================
+*.log
+
+# =========================
+# NODE (kalau nanti pakai)
+# =========================
+node_modules/
+
+# =========================
+# STORAGE CONTENT (HANYA FILE, BUKAN FOLDER)
+# =========================
+
+# Uploads (video besar, user-specific)
+storage/uploads/*
+!storage/uploads/.gitkeep
+
+# Generated clips
+storage/clips/*
+!storage/clips/.gitkeep
+
+# Final rendered videos
+storage/final/*
+!storage/final/.gitkeep
+
+# Subtitle ASS files
+storage/ass/*
+!storage/ass/.gitkeep
+
+# Transcripts (JSON hasil Whisper)
+storage/transcripts/*
+!storage/transcripts/.gitkeep
+
+# =========================
+# CACHE / TEMP
+# =========================
+*.tmp
+*.cache

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Video Editor Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+
+    /* ========= THEMES ========= */
+    :root{
+      --bg1:#020617;
+      --bg2:#020617;
+      --glass: rgba(255,255,255,0.08);
+      --glass2: rgba(255,255,255,0.06);
+      --stroke: rgba(255,255,255,0.12);
+      --stroke2: rgba(255,255,255,0.10);
+      --txt: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.58);
+      --muted2: rgba(255,255,255,0.42);
+      --accent:#22d3ee; /* cyan */
+      --accent2:#a855f7; /* purple */
+      --good:#34d399; /* emerald */
+      --bad:#fb7185;  /* rose */
+      --warn:#fbbf24; /* amber */
+      --shadow: 0 0 22px rgba(34,211,238,.25), inset 0 0 18px rgba(34,211,238,.10);
+      --shadow2: 0 0 22px rgba(168,85,247,.22), inset 0 0 18px rgba(168,85,247,.10);
+      --radius: 22px;
+    }
+
+    body[data-theme="neon"]{
+      background:
+        radial-gradient(circle at 20% 20%, rgba(14,165,233,0.35) 0%, transparent 42%),
+        radial-gradient(circle at 80% 80%, rgba(168,85,247,0.32) 0%, transparent 42%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      color: var(--txt);
+    }
+
+    body[data-theme="dark"]{
+      background:
+        radial-gradient(circle at 30% 15%, rgba(99,102,241,0.22) 0%, transparent 46%),
+        radial-gradient(circle at 70% 85%, rgba(34,211,238,0.18) 0%, transparent 52%),
+        linear-gradient(180deg, #0b1020, #050712);
+      color: var(--txt);
+    }
+
+    body[data-theme="minimal"]{
+      background:
+        linear-gradient(180deg, #0b1220, #0a0f1a);
+      color: var(--txt);
+    }
+
+    .glass{
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--stroke);
+    }
+
+    .glass-soft{
+      background: var(--glass2);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--stroke2);
+    }
+
+    .neon{
+      box-shadow: var(--shadow);
+    }
+
+    .neon2{
+      box-shadow: var(--shadow2);
+    }
+
+    .btn{
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 800;
+      transition: transform .12s ease, filter .2s ease, box-shadow .2s ease, opacity .2s ease;
+      user-select: none;
+    }
+    .btn:active{ transform: translateY(1px) scale(0.99); }
+    .btn:disabled{ opacity: .45; cursor: not-allowed; }
+
+    .btn-cyan{
+      background: linear-gradient(135deg, rgba(34,211,238,0.95), rgba(14,165,233,0.85));
+      box-shadow: 0 10px 26px rgba(34,211,238,0.18);
+    }
+    .btn-cyan:hover{ filter: brightness(1.06); box-shadow: 0 12px 32px rgba(34,211,238,0.25); }
+
+    .btn-purple{
+      background: linear-gradient(135deg, rgba(168,85,247,0.95), rgba(99,102,241,0.85));
+      box-shadow: 0 10px 26px rgba(168,85,247,0.18);
+    }
+    .btn-purple:hover{ filter: brightness(1.06); box-shadow: 0 12px 32px rgba(168,85,247,0.25); }
+
+    .btn-emerald{
+      background: linear-gradient(135deg, rgba(52,211,153,0.95), rgba(16,185,129,0.85));
+      box-shadow: 0 10px 26px rgba(52,211,153,0.18);
+    }
+    .btn-emerald:hover{ filter: brightness(1.06); box-shadow: 0 12px 32px rgba(52,211,153,0.25); }
+
+    .btn-ghost{
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .btn-ghost:hover{ background: rgba(255,255,255,0.09); }
+
+    .tag{
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* ========= LOADING ========= */
+    .ring{
+      width:56px;height:56px;border-radius:999px;
+      border:6px solid rgba(255,255,255,.10);
+      border-top-color: var(--accent);
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg) } }
+
+    .pulsebar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+    .pulsebar > div{
+      height:100%;
+      width:40%;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: slide 1.1s infinite;
+    }
+    @keyframes slide { 0%{transform:translateX(-120%)} 100%{transform:translateX(320%)} }
+
+    /* ========= PROGRESS ========= */
+    .progressWrap{
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .progressBar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(34,211,238,0.95), rgba(168,85,247,0.90));
+      transition: width .25s ease;
+    }
+
+    /* ========= MODAL ========= */
+    .modal-backdrop{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 50;
+    }
+    .modal{
+      width: min(1100px, 96vw);
+      max-height: 92vh;
+      overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(10,12,24,0.82);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 22px 80px rgba(0,0,0,0.55);
+      display: flex;
+      flex-direction: column;
+    }
+    .modalHeader{
+      padding: 16px 18px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+    .modalBody{
+      padding: 16px 18px;
+      overflow: auto;
+    }
+    .modalFooter{
+      padding: 14px 18px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+      display:flex;
+      gap:10px;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    /* ========= TIMELINE TABLE ========= */
+    .rowItem{
+      display:grid;
+      grid-template-columns: 110px 110px 1fr 130px;
+      gap:10px;
+      align-items:center;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 10px;
+      transition: transform .12s ease, background .2s ease;
+    }
+    .rowItem:hover{ background: rgba(255,255,255,0.07); transform: translateY(-1px); }
+
+    .inp{
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      outline: none;
+      color: rgba(255,255,255,0.92);
+    }
+    .inp:focus{
+      border-color: rgba(34,211,238,0.55);
+      box-shadow: 0 0 0 4px rgba(34,211,238,0.15);
+    }
+
+    .tinyBtn{
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      transition: background .2s ease, transform .12s ease;
+    }
+    .tinyBtn:hover{ background: rgba(255,255,255,0.10); }
+    .tinyBtn:active{ transform: translateY(1px); }
+
+    .kbd{
+      padding: 4px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* little vibe */
+    .floaty{
+      animation: floaty 3.2s ease-in-out infinite;
+    }
+    @keyframes floaty{
+      0%,100%{ transform: translateY(0px); }
+      50%{ transform: translateY(-6px); }
+    }
+  </style>
+</head>
+
+<body class="p-6" data-theme="neon">
+  <div class="max-w-7xl mx-auto glass neon rounded-[var(--radius)] p-7 md:p-8">
+
+    <!-- TOP BAR -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-7">
+      <div>
+        <div class="text-xs" style="color:var(--muted2)">Creator Studio</div>
+        <div class="flex items-center gap-3 mt-1">
+          <div class="glass-soft neon2 rounded-2xl px-4 py-2 text-lg font-black floaty">⚡</div>
+          <div>
+            <h1 class="text-3xl md:text-4xl font-black tracking-tight">AI VIDEO EDITOR</h1>
+            <p class="mt-1 text-sm" style="color:var(--muted)">
+              Auto Clip • Multi-model (DeepSeek + Qwen) • Timeline Subtitle Editor
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mt-4">
+          <span class="tag">Preset: TikTok/IG (9:16)</span>
+          <span class="tag">Kinetic Subtitle (ASS)</span>
+          <span class="tag">Auto Clip (AI)</span>
+          <span class="tag">FFmpeg Render</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3 items-start md:items-end">
+        <div class="glass rounded-2xl px-4 py-3 text-sm">
+          Status: <span id="miniStatus" class="font-extrabold" style="color:var(--accent)">Ready</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="text-xs" style="color:var(--muted2)">Theme</div>
+          <select id="themeSelect" class="inp text-sm" style="width:170px">
+            <option value="neon" selected>Neon</option>
+            <option value="dark">Dark</option>
+            <option value="minimal">Minimal</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid lg:grid-cols-12 gap-6">
+
+      <!-- LEFT PANEL -->
+      <div class="lg:col-span-4 glass rounded-2xl p-6">
+        <h2 class="font-extrabold text-lg mb-4">🎥 Input</h2>
+
+        <input id="videoInput" type="file" accept="video/*"
+          class="block w-full mb-4 text-sm
+          file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
+          file:bg-cyan-600 file:text-white hover:file:bg-cyan-700" />
+
+        <div class="grid grid-cols-2 gap-3">
+          <button id="btnUpload" class="btn btn-cyan" onclick="uploadVideo()">Upload</button>
+          <button id="btnTranscribe" class="btn btn-emerald" onclick="runTranscribe()" disabled>Transcribe</button>
+        </div>
+
+        <button id="btnClips" class="btn btn-purple w-full mt-3" onclick="runClips()" disabled>
+          Generate Clips
+        </button>
+
+        <!-- LOADING BOX -->
+        <div class="mt-6 glass rounded-2xl p-4">
+          <div class="flex items-center gap-4">
+            <div id="loader" class="hidden">
+              <div class="ring"></div>
+            </div>
+
+            <div class="flex-1">
+              <div id="statusText" class="font-bold" style="color:var(--txt)">Menunggu input…</div>
+              <div id="subStatus" class="text-sm mt-1" style="color:var(--muted)">
+                Upload video untuk mulai.
+              </div>
+
+              <div class="mt-3 progressWrap">
+                <div id="progressBar" class="progressBar"></div>
+              </div>
+              <div class="flex justify-between mt-1 text-xs" style="color:var(--muted2)">
+                <span id="progressHint">Idle</span>
+                <span><span id="progressPct">0</span>%</span>
+              </div>
+
+              <div class="pulsebar mt-3 hidden" id="pulse">
+                <div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 text-xs" style="color:var(--muted2)">
+          Hotkeys: <span class="kbd">U</span> Upload • <span class="kbd">T</span> Transcribe • <span class="kbd">G</span> Generate
+        </div>
+
+        <div class="mt-3 text-xs" style="color:var(--muted2)">
+          Tips: clip default 25–60 detik biar nggak kepotong, tapi kualitas tetap tergantung transcript & AI.
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="lg:col-span-8 glass rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-extrabold text-lg">🧩 Output Clips</h2>
+          <div class="text-sm" style="color:var(--muted)">
+            Klik <b>Timeline Editor</b> → atur subtitle → <b>Render Subtitle</b>
+          </div>
+        </div>
+
+        <div id="clipsHint" style="color:var(--muted)">Belum ada clip. Generate dulu.</div>
+        <div id="clipsBox" class="grid md:grid-cols-2 gap-4 mt-4"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========= MODAL TIMELINE ========= -->
+  <div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modalHeader">
+        <div class="flex flex-col">
+          <div class="text-xs" style="color:var(--muted2)">Timeline Subtitle Editor</div>
+          <div class="text-lg font-black" id="modalTitle">Clip</div>
+          <div class="text-xs mt-1" style="color:var(--muted)">
+            Edit start/end/text (detik). Ini timeline RELATIVE (mulai dari 0 di clip). Jadi harus sync.
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button class="tinyBtn" id="btnAddRow">+ Add Row</button>
+          <button class="tinyBtn" id="btnCloseModal">Close</button>
+        </div>
+      </div>
+
+      <div class="modalBody">
+        <div class="glass-soft rounded-2xl p-4 mb-4">
+          <div class="grid md:grid-cols-3 gap-3 text-sm">
+            <div>
+              <div class="text-xs" style="color:var(--muted2)">Transcript</div>
+              <div class="font-bold" id="modalTranscriptName">-</div>
+            </div>
+            <div>
+              <div class="text-xs" style="color:var(--muted2)">Clip Original Range</div>
+              <div class="font-bold"><span id="modalAbsStart">-</span>s → <span id="modalAbsEnd">-</span>s</div>
+            </div>
+            <div>
+              <div class="text-xs" style="color:var(--muted2)">Quick Tools</div>
+              <div class="flex flex-wrap gap-2 mt-1">
+                <button class="tinyBtn" id="btnNormalize">Normalize</button>
+                <button class="tinyBtn" id="btnTighten">Tighten</button>
+                <button class="tinyBtn" id="btnExpand">Expand</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs mb-2" style="color:var(--muted2)">
+          Format: <span class="kbd">start</span> <span class="kbd">end</span> <span class="kbd">text</span>.  
+          Tip: kalau subtitle telat → kecilin start. Kalau kecepetan → gedein start. Ya hidup emang gitu.
+        </div>
+
+        <div id="timelineBox"></div>
+      </div>
+
+      <div class="modalFooter">
+        <div class="text-xs" style="color:var(--muted2)">
+          Render akan burn subtitle ke video via FFmpeg. (Kalau gagal, berarti path/ASS error—bukan kutukan.)
+        </div>
+
+        <div class="flex gap-2">
+          <button class="btn btn-ghost" id="btnPreviewApply">Apply to Player</button>
+          <button class="btn btn-purple" id="btnRenderSubtitle">Render Subtitle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ==============================
+   GLOBAL STATE
+============================== */
+let uploadedFilename = null;
+let latestClips = [];
+let activeClip = null;  // clip object from list
+let activeTimeline = []; // items [{start,end,text}]
+let isBusy = false;
+
+const loader = document.getElementById("loader");
+const pulse = document.getElementById("pulse");
+const statusText = document.getElementById("statusText");
+const subStatus = document.getElementById("subStatus");
+const miniStatus = document.getElementById("miniStatus");
+
+const progressBar = document.getElementById("progressBar");
+const progressPct = document.getElementById("progressPct");
+const progressHint = document.getElementById("progressHint");
+
+const btnTranscribe = document.getElementById("btnTranscribe");
+const btnClips = document.getElementById("btnClips");
+
+/* ==============================
+   THEME
+============================== */
+const themeSelect = document.getElementById("themeSelect");
+themeSelect.addEventListener("change", () => {
+  document.body.setAttribute("data-theme", themeSelect.value);
+});
+
+/* ==============================
+   UTIL
+============================== */
+function esc(s){
+  return (s||"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+function fmt(n){ return (Number(n)||0).toFixed(2); }
+
+function setProgress(pct, hint="") {
+  pct = clamp(Number(pct)||0, 0, 100);
+  progressBar.style.width = pct + "%";
+  progressPct.textContent = String(Math.round(pct));
+  progressHint.textContent = hint || (pct===0 ? "Idle" : "Working…");
+}
+
+function setLoading(title, detail="", pct=10) {
+  isBusy = true;
+  loader.classList.remove("hidden");
+  pulse.classList.remove("hidden");
+  statusText.textContent = title;
+  subStatus.textContent = detail;
+  miniStatus.textContent = "Processing…";
+  miniStatus.style.color = "var(--warn)";
+  setProgress(pct, title);
+}
+
+function setDone(title, detail="", pct=100) {
+  isBusy = false;
+  loader.classList.add("hidden");
+  pulse.classList.add("hidden");
+  statusText.textContent = title;
+  subStatus.textContent = detail;
+  miniStatus.textContent = "Ready";
+  miniStatus.style.color = "var(--accent)";
+  setProgress(pct, title);
+  setTimeout(()=> setProgress(0,"Idle"), 900);
+}
+
+function toast(msg){
+  alert(msg);
+}
+
+/* ==============================
+   HOTKEYS
+============================== */
+document.addEventListener("keydown", (e) => {
+  if (e.target && ["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName)) return;
+
+  if (e.key.toLowerCase()==="u") uploadVideo();
+  if (e.key.toLowerCase()==="t") runTranscribe();
+  if (e.key.toLowerCase()==="g") runClips();
+});
+
+/* ==============================
+   API CALLS
+============================== */
+async function uploadVideo() {
+  const input = document.getElementById("videoInput");
+  if (!input.files.length) return toast("Pilih video dulu bro 😭");
+
+  setLoading("Uploading…", "Ngirim file ke server", 18);
+
+  const fd = new FormData();
+  fd.append("file", input.files[0]);
+
+  const res = await fetch("/api/upload/video", { method:"POST", body: fd });
+  const data = await res.json().catch(()=> ({}));
+
+  if (!res.ok) return setDone("Upload gagal", data.detail || "unknown", 0);
+
+  uploadedFilename = data.filename;
+
+  btnTranscribe.disabled = false;
+  btnClips.disabled = true;
+
+  setDone("Upload sukses ✔", "Siap transcribe", 100);
+}
+
+async function runTranscribe() {
+  if (!uploadedFilename) return toast("Upload dulu bro 😅");
+  if (isBusy) return;
+
+  setLoading("Transcribing…", "Whisper lagi dengerin. Ini bisa lama kalau CPU pas-pasan.", 22);
+
+  // fake progress (karena belum pakai websocket)
+  let pct = 22;
+  const t = setInterval(() => {
+    pct = Math.min(pct + Math.random()*6, 88);
+    setProgress(pct, "Transcribing…");
+  }, 650);
+
+  const res = await fetch(`/api/transcribe/video/${encodeURIComponent(uploadedFilename)}`, { method:"POST" });
+  const data = await res.json().catch(()=> ({}));
+
+  clearInterval(t);
+
+  if (!res.ok) return setDone("Transcribe gagal", data.detail || "unknown", 0);
+
+  btnClips.disabled = false;
+  setDone("Transcribe selesai ✔", "Sekarang generate clips", 100);
+}
+
+async function runClips() {
+  if (!uploadedFilename) return toast("Upload dulu bro 😅");
+  if (isBusy) return;
+
+  setLoading("Generating clips…", "DeepSeek milih momen → Qwen bikin hook → FFmpeg render", 25);
+
+  document.getElementById("clipsHint").textContent = "Sedang generate…";
+  document.getElementById("clipsBox").innerHTML = "";
+
+  let pct = 25;
+  const t = setInterval(() => {
+    pct = Math.min(pct + Math.random()*8, 90);
+    setProgress(pct, "Generating clips…");
+  }, 700);
+
+  const res = await fetch(`/api/clips/generate/${encodeURIComponent(uploadedFilename)}?max_clips=6&min_sec=25&max_sec=60`, { method:"POST" });
+  const data = await res.json().catch(()=> ({}));
+
+  clearInterval(t);
+
+  if (!res.ok) {
+    setDone("Generate gagal", data.detail || "unknown", 0);
+    document.getElementById("clipsHint").textContent = "Gagal generate clips.";
+    return;
+  }
+
+  const clips = data.clips || [];
+  latestClips = clips;
+
+  if (!clips.length) {
+    setDone("Tidak ada clip", "AI nggak nemu momen kuat di transcript", 100);
+    document.getElementById("clipsHint").textContent = "Tidak ada clip.";
+    return;
+  }
+
+  renderClips(clips);
+  setDone("Clips siap ✔", `Total: ${clips.length}. Pilih yang paling strong.`, 100);
+}
+
+/* ==============================
+   RENDER CLIPS
+============================== */
+function renderClips(clips) {
+  const box = document.getElementById("clipsBox");
+  const hint = document.getElementById("clipsHint");
+  hint.textContent = `Total clips: ${clips.length}`;
+  box.innerHTML = "";
+
+  clips.forEach((c, idx) => {
+    const card = document.createElement("div");
+    card.className = "glass rounded-2xl p-4 border border-white/10";
+
+    const score = (c.score ?? 0);
+    const hook = c.hook || "";
+    const reason = c.reason || "";
+    const startAbs = Number(c.start ?? 0);
+    const endAbs = Number(c.end ?? 0);
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between mb-2">
+        <div class="font-black">Clip #${idx+1}</div>
+        <div class="text-xs" style="color:var(--muted)">score ${Number(score).toFixed(2)}</div>
+      </div>
+
+      <div class="text-sm mb-2">
+        <div class="text-xs" style="color:var(--muted2)">Hook</div>
+        <div class="font-bold">${esc(hook)}</div>
+      </div>
+
+      <div class="text-xs mb-3" style="color:var(--muted)">${esc(reason)}</div>
+
+      <video controls class="w-full rounded-xl mb-3" src="${c.url}?t=${Date.now()}"></video>
+
+      <div class="grid grid-cols-2 gap-2 text-xs" style="color:var(--muted)">
+        <div>Abs Start: <span style="color:var(--txt)">${fmt(startAbs)}s</span></div>
+        <div>Abs End: <span style="color:var(--txt)">${fmt(endAbs)}s</span></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button class="btn btn-cyan w-full" data-timeline>Timeline Editor</button>
+        <a class="btn btn-ghost w-full text-center" href="${c.url}" target="_blank" rel="noreferrer">Open Clip</a>
+      </div>
+
+      <div class="text-xs mt-2" style="color:var(--muted2)">
+        Subtitle editor: edit timeline → render → auto refresh video.
+      </div>
+    `;
+
+    const btnTimeline = card.querySelector("[data-timeline]");
+    const vid = card.querySelector("video");
+
+    btnTimeline.addEventListener("click", async () => {
+      activeClip = { ...c, _idx: idx, _videoEl: vid };
+      await openTimelineEditor(activeClip);
+    });
+
+    box.appendChild(card);
+  });
+}
+
+/* ==============================
+   MODAL LOGIC
+============================== */
+const modalBackdrop = document.getElementById("modalBackdrop");
+const btnCloseModal = document.getElementById("btnCloseModal");
+const btnAddRow = document.getElementById("btnAddRow");
+const btnRenderSubtitle = document.getElementById("btnRenderSubtitle");
+const btnPreviewApply = document.getElementById("btnPreviewApply");
+const btnNormalize = document.getElementById("btnNormalize");
+const btnTighten = document.getElementById("btnTighten");
+const btnExpand = document.getElementById("btnExpand");
+
+btnCloseModal.addEventListener("click", closeModal);
+modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
+
+function openModal(){
+  modalBackdrop.style.display = "flex";
+}
+function closeModal(){
+  modalBackdrop.style.display = "none";
+  activeTimeline = [];
+  activeClip = null;
+}
+
+function getModalEls(){
+  return {
+    title: document.getElementById("modalTitle"),
+    transcript: document.getElementById("modalTranscriptName"),
+    absStart: document.getElementById("modalAbsStart"),
+    absEnd: document.getElementById("modalAbsEnd"),
+    box: document.getElementById("timelineBox"),
+  };
+}
+
+async function openTimelineEditor(clip) {
+  if (!uploadedFilename) return toast("Transcript belum ada. Upload + transcribe dulu.");
+
+  const els = getModalEls();
+  els.title.textContent = `Clip #${clip._idx + 1} — Timeline Editor`;
+  els.transcript.textContent = uploadedFilename;
+  els.absStart.textContent = fmt(clip.start);
+  els.absEnd.textContent = fmt(clip.end);
+
+  openModal();
+  els.box.innerHTML = `<div class="text-sm" style="color:var(--muted)">Loading timeline…</div>`;
+
+  try{
+    setLoading("Loading timeline…", "Ambil subtitle segment di range clip lalu shift ke timeline 0..durasi", 20);
+
+    const url = `/api/subtitle/timeline/${encodeURIComponent(clip.file)}?transcript_name=${encodeURIComponent(uploadedFilename)}&clip_start_abs=${encodeURIComponent(clip.start)}&clip_end_abs=${encodeURIComponent(clip.end)}`;
+    const res = await fetch(url, { method:"POST" });
+    const data = await res.json().catch(()=> ({}));
+
+    if (!res.ok) {
+      setDone("Timeline gagal", data.detail || "unknown", 0);
+      els.box.innerHTML = `<div class="text-sm" style="color:var(--bad)">Error: ${esc(data.detail || "unknown")}</div>`;
+      return;
+    }
+
+    activeTimeline = (data.items || []).map(x => ({
+      start: Number(x.start ?? 0),
+      end: Number(x.end ?? 0.8),
+      text: String(x.text ?? "")
+    }));
+
+    renderTimelineRows();
+    setDone("Timeline loaded ✔", `Source: ${data.source}`, 100);
+  }catch(err){
+    setDone("Timeline error", String(err), 0);
+    els.box.innerHTML = `<div class="text-sm" style="color:var(--bad)">Error: ${esc(String(err))}</div>`;
+  }
+}
+
+function renderTimelineRows() {
+  const els = getModalEls();
+  const box = els.box;
+
+  if (!activeTimeline.length) {
+    box.innerHTML = `<div class="text-sm" style="color:var(--muted)">Timeline kosong. Klik "Add Row".</div>`;
+    return;
+  }
+
+  box.innerHTML = "";
+
+  activeTimeline.forEach((it, i) => {
+    const row = document.createElement("div");
+    row.className = "rowItem";
+
+    row.innerHTML = `
+      <div>
+        <div class="text-[10px]" style="color:var(--muted2)">Start (s)</div>
+        <input class="inp" type="number" step="0.01" value="${fmt(it.start)}" data-start />
+      </div>
+      <div>
+        <div class="text-[10px]" style="color:var(--muted2)">End (s)</div>
+        <input class="inp" type="number" step="0.01" value="${fmt(it.end)}" data-end />
+      </div>
+      <div>
+        <div class="text-[10px]" style="color:var(--muted2)">Text</div>
+        <input class="inp" type="text" value="${esc(it.text)}" data-text />
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button class="tinyBtn" data-up title="Move up">↑</button>
+        <button class="tinyBtn" data-down title="Move down">↓</button>
+        <button class="tinyBtn" data-del title="Delete" style="border-color:rgba(251,113,133,0.35)">Del</button>
+      </div>
+    `;
+
+    const startEl = row.querySelector("[data-start]");
+    const endEl = row.querySelector("[data-end]");
+    const textEl = row.querySelector("[data-text]");
+
+    startEl.addEventListener("input", () => {
+      activeTimeline[i].start = Number(startEl.value||0);
+    });
+    endEl.addEventListener("input", () => {
+      activeTimeline[i].end = Number(endEl.value||0);
+    });
+    textEl.addEventListener("input", () => {
+      activeTimeline[i].text = textEl.value || "";
+    });
+
+    row.querySelector("[data-del]").addEventListener("click", () => {
+      activeTimeline.splice(i,1);
+      renderTimelineRows();
+    });
+
+    row.querySelector("[data-up]").addEventListener("click", () => {
+      if (i===0) return;
+      const tmp = activeTimeline[i-1];
+      activeTimeline[i-1] = activeTimeline[i];
+      activeTimeline[i] = tmp;
+      renderTimelineRows();
+    });
+
+    row.querySelector("[data-down]").addEventListener("click", () => {
+      if (i===activeTimeline.length-1) return;
+      const tmp = activeTimeline[i+1];
+      activeTimeline[i+1] = activeTimeline[i];
+      activeTimeline[i] = tmp;
+      renderTimelineRows();
+    });
+
+    box.appendChild(row);
+  });
+}
+
+/* ==============================
+   TIMELINE TOOLS
+============================== */
+btnAddRow.addEventListener("click", () => {
+  activeTimeline.push({ start: 0, end: 0.9, text: "Tulis subtitle di sini" });
+  renderTimelineRows();
+});
+
+btnNormalize.addEventListener("click", () => {
+  // sort & fix invalid durations
+  activeTimeline = activeTimeline
+    .map(x => ({
+      start: Math.max(0, Number(x.start||0)),
+      end: Math.max(0, Number(x.end||0)),
+      text: String(x.text||"")
+    }))
+    .sort((a,b)=> a.start - b.start)
+    .map(x => {
+      if (x.end <= x.start) x.end = x.start + 0.6;
+      return x;
+    });
+  renderTimelineRows();
+});
+
+btnTighten.addEventListener("click", () => {
+  // tighten: shrink each by 0.05 sec both sides (if possible)
+  activeTimeline = activeTimeline.map(x => {
+    let st = Number(x.start||0);
+    let ed = Number(x.end||0);
+    st = Math.max(0, st + 0.05);
+    ed = Math.max(st + 0.2, ed - 0.05);
+    return { ...x, start: Number(st.toFixed(2)), end: Number(ed.toFixed(2)) };
+  });
+  renderTimelineRows();
+});
+
+btnExpand.addEventListener("click", () => {
+  // expand: expand each by 0.06 sec both sides
+  activeTimeline = activeTimeline.map(x => {
+    let st = Number(x.start||0);
+    let ed = Number(x.end||0);
+    st = Math.max(0, st - 0.06);
+    ed = ed + 0.06;
+    if (ed <= st) ed = st + 0.6;
+    return { ...x, start: Number(st.toFixed(2)), end: Number(ed.toFixed(2)) };
+  });
+  renderTimelineRows();
+});
+
+btnPreviewApply.addEventListener("click", () => {
+  // just a UX action (no backend). We normalize first.
+  btnNormalize.click();
+  toast("Applied. Sekarang render biar beneran kebakar ke video 🔥");
+});
+
+/* ==============================
+   RENDER SUBTITLE (BACKEND)
+============================== */
+btnRenderSubtitle.addEventListener("click", async () => {
+  if (!activeClip) return;
+  if (!uploadedFilename) return toast("Transcript belum ada.");
+  if (isBusy) return;
+
+  // Normalize first
+  btnNormalize.click();
+
+  try{
+    setLoading("Rendering subtitle…", "Burn-in ASS via FFmpeg (tunggu bro, ini kerja berat)", 30);
+
+    // fake progress
+    let pct = 30;
+    const t = setInterval(() => {
+      pct = Math.min(pct + Math.random()*10, 92);
+      setProgress(pct, "Rendering subtitle…");
+    }, 650);
+
+    const payload = {
+      transcript_name: uploadedFilename,
+      clip_start_abs: Number(activeClip.start||0),
+      clip_end_abs: Number(activeClip.end||0),
+      items: activeTimeline.map(x => ({
+        start: Number(x.start||0),
+        end: Number(x.end||0),
+        text: String(x.text||"")
+      }))
+    };
+
+    const res = await fetch(`/api/subtitle/render/${encodeURIComponent(activeClip.file)}`, {
+      method:"POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(()=> ({}));
+    clearInterval(t);
+
+    if (!res.ok) {
+      setDone("Subtitle gagal", data.detail || "unknown", 0);
+      toast("Subtitle gagal: " + (data.detail || "unknown"));
+      return;
+    }
+
+    // Auto refresh video player on card
+    if (activeClip._videoEl && data.url) {
+      activeClip._videoEl.src = data.url + "?t=" + Date.now();
+      activeClip._videoEl.load();
+    }
+
+    setDone("Subtitle jadi ✔", "Video sudah auto refresh (cek player di card)", 100);
+    toast("Subtitle berhasil diburn 🔥");
+    closeModal();
+  }catch(err){
+    setDone("Render error", String(err), 0);
+    toast("Render error: " + String(err));
+  }
+});
+</script>
+</body>
+</html>
