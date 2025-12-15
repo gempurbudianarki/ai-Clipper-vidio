@@ -1,6 +1,3 @@
-
-
-```md
 <div align="center">
 
 # 🎬 AI Video Editor Studio
