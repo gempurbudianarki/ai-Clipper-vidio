@@ -8,6 +8,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.pytest_cache/
 
 # =========================
 # OS / EDITOR JUNK
@@ -16,11 +17,14 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+*.swp
 
 # =========================
-# LOGS
+# LOGS & DATABASES
 # =========================
 *.log
+*.sqlite3
+*.db
 
 # =========================
 # NODE (kalau nanti pakai)
@@ -28,28 +32,51 @@ Thumbs.db
 node_modules/
 
 # =========================
-# STORAGE CONTENT (HANYA FILE, BUKAN FOLDER)
+# STORAGE CONTENT (HANYA FILE, FOLDER TETAP DI-TRACK)
 # =========================
 
-# Uploads (video besar, user-specific)
+# 1. Input Video (Uploads & Downloaded from YT)
 storage/uploads/*
 !storage/uploads/.gitkeep
 
-# Generated clips
+# 2. Custom BGM (User Uploads)
+storage/bgm/*
+!storage/bgm/.gitkeep
+
+# 3. Intermediate Clips (Potongan Kasar)
 storage/clips/*
 !storage/clips/.gitkeep
 
-# Final rendered videos
-storage/final/*
-!storage/final/.gitkeep
+# 4. Transcripts (JSON Whisper)
+storage/transcripts/*
+!storage/transcripts/.gitkeep
 
-# Subtitle ASS files
+# 5. Timeline Edits (JSON save state user)
+storage/edits/*
+!storage/edits/.gitkeep
+
+# 6. ASS Subtitle Files (Temporary)
 storage/ass/*
 !storage/ass/.gitkeep
 
-# Transcripts (JSON hasil Whisper)
-storage/transcripts/*
-!storage/transcripts/.gitkeep
+# 7. Final Output (Rendered Video)
+storage/clips_subtitled/*
+!storage/clips_subtitled/.gitkeep
+
+# (Legacy folder support just in case)
+storage/final/*
+!storage/final/.gitkeep
+
+# =========================
+# ASSETS (Opsional)
+# =========================
+# Kalau lo mau file bgm.mp3 default TETAP masuk git, jangan di-ignore.
+# Tapi kalau lo naruh file test video di root, ignore ini:
+*.mp4
+*.mov
+*.mp3
+*.wav
+assets/bgm.mp3
 
 # =========================
 # CACHE / TEMP

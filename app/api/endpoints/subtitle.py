@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from app.services.subtitle.ass_builder import build_ass_from_timeline
 from app.services.subtitle.ffmpeg_subtitle import burn_ass_subtitle
@@ -16,24 +16,33 @@ STORAGE_EDITS = "storage/edits"
 STORAGE_CLIPS = "storage/clips"
 STORAGE_OUT = "storage/clips_subtitled"
 
+# === DATA MODELS ===
+class WordItem(BaseModel):
+    word: str
+    start: float
+    end: float
+
 class TimelineItem(BaseModel):
     start: float
     end: float
     text: str
+    words: Optional[List[WordItem]] = None 
 
 class TimelinePayload(BaseModel):
     transcript_name: str
-    clip_start_abs: float  # start di video original (detik)
+    clip_start_abs: float
     clip_end_abs: float
     items: List[TimelineItem]
+    ratio: str = "9:16"
+    style: str = "hormozi"
+    hook: str = ""
+    bgm: Optional[str] = None # <--- Fitur BGM Filename
 
+# === HELPERS (Sama seperti sebelumnya) ===
 def _normalize_transcript_name(name: str) -> str:
-    # kalau user kirim "xxx.mp4" -> jadi "xxx"
     base = name
-    if base.lower().endswith(".mp4"):
-        base = base[:-4]
-    if base.lower().endswith(".json"):
-        base = base[:-5]
+    if base.lower().endswith(".mp4"): base = base[:-4]
+    if base.lower().endswith(".json"): base = base[:-5]
     return base
 
 def _transcript_path(transcript_name: str) -> str:
@@ -50,51 +59,41 @@ def _load_transcript_segments(transcript_name: str) -> List[Dict]:
         raise HTTPException(status_code=404, detail=f"Transcript tidak ditemukan: {path}")
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
-    # fleksibel: bisa "segments" atau langsung list
-    if isinstance(data, dict) and "segments" in data:
-        return data["segments"]
-    if isinstance(data, list):
-        return data
+    if isinstance(data, dict) and "segments" in data: return data["segments"]
+    if isinstance(data, list): return data
     return []
 
 def _default_timeline_from_segments(segments: List[Dict], clip_start_abs: float, clip_end_abs: float) -> List[Dict]:
-    """
-    Ambil segment di range clip [start_abs, end_abs], lalu SHIFT ke timebase clip (start=0).
-    """
     out = []
     for seg in segments:
         st = float(seg.get("start", 0))
         ed = float(seg.get("end", st + 0.8))
         text = (seg.get("text") or "").strip()
-        if not text:
-            continue
+        words = seg.get("words", [])
+        
+        if not text: continue
+        if ed < clip_start_abs or st > clip_end_abs: continue
+        
+        rel_st = round(max(st, clip_start_abs) - clip_start_abs, 2)
+        rel_ed = round(min(ed, clip_end_abs) - clip_start_abs, 2)
+        if rel_ed - rel_st < 0.1: continue
 
-        # pilih yang overlap
-        if ed < clip_start_abs or st > clip_end_abs:
-            continue
+        rel_words = []
+        for w in words:
+            if w["end"] > clip_start_abs and w["start"] < clip_end_abs:
+                rel_words.append({
+                    "word": w["word"],
+                    "start": round(max(w["start"], clip_start_abs) - clip_start_abs, 2),
+                    "end": round(min(w["end"], clip_end_abs) - clip_start_abs, 2)
+                })
 
-        # clamp ke range clip
-        st2 = max(st, clip_start_abs)
-        ed2 = min(ed, clip_end_abs)
-
-        # shift relatif
-        rel_st = st2 - clip_start_abs
-        rel_ed = ed2 - clip_start_abs
-
-        # buang yang kependekan
-        if rel_ed - rel_st < 0.12:
-            continue
-
-        out.append({"start": round(rel_st, 2), "end": round(rel_ed, 2), "text": text})
+        out.append({"start": rel_st, "end": rel_ed, "text": text, "words": rel_words})
     return out
+
+# === ENDPOINTS ===
 
 @router.post("/timeline/{clip_file}")
 def get_or_build_timeline(clip_file: str, transcript_name: str, clip_start_abs: float, clip_end_abs: float):
-    """
-    Return timeline untuk editor.
-    Kalau sudah ada edit -> return edit.
-    Kalau belum -> build dari transcript (sync bener).
-    """
     os.makedirs(STORAGE_EDITS, exist_ok=True)
     edit_path = _edit_path(clip_file)
 
@@ -105,7 +104,6 @@ def get_or_build_timeline(clip_file: str, transcript_name: str, clip_start_abs: 
     segs = _load_transcript_segments(transcript_name)
     items = _default_timeline_from_segments(segs, clip_start_abs, clip_end_abs)
 
-    # simpan baseline agar consistent
     with open(edit_path, "w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
 
@@ -113,33 +111,43 @@ def get_or_build_timeline(clip_file: str, transcript_name: str, clip_start_abs: 
 
 @router.post("/render/{clip_file}")
 def render_subtitle_from_timeline(payload: TimelinePayload, clip_file: str):
-    """
-    Terima timeline hasil edit -> generate ASS -> burn -> return url video subtitled.
-    """
     clip_path = os.path.join(STORAGE_CLIPS, os.path.basename(clip_file))
     if not os.path.exists(clip_path):
-        raise HTTPException(status_code=404, detail=f"Clip tidak ditemukan: {clip_path}")
+        raise HTTPException(status_code=404, detail=f"Clip tidak ditemukan")
 
-    # simpan timeline edit
+    # 1. Save Edit
     os.makedirs(STORAGE_EDITS, exist_ok=True)
     edit_path = _edit_path(clip_file)
-    items = [i.model_dump() for i in payload.items]
     with open(edit_path, "w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False, indent=2)
+        f.write(payload.model_dump_json(indent=2))
 
-    # generate ASS
+    # 2. Generate ASS (Include Hook)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     ass_name = f"{os.path.basename(clip_file)}_{ts}.ass"
     ass_path = os.path.join(STORAGE_ASS, ass_name)
-    build_ass_from_timeline(items, ass_path)
+    items_dict = [i.model_dump() for i in payload.items]
+    
+    build_ass_from_timeline(
+        items_dict, 
+        ass_path, 
+        ratio=payload.ratio, 
+        style_name=payload.style,
+        hook_text=payload.hook
+    )
 
-    # burn ke video
-    out_name = f"{os.path.splitext(os.path.basename(clip_file))[0]}_sub_{ts}.mp4"
+    # 3. Render (Include BGM & HD settings)
+    out_name = f"{os.path.splitext(os.path.basename(clip_file))[0]}_{payload.style}_{ts}.mp4"
     out_path = os.path.join(STORAGE_OUT, out_name)
 
     try:
-        burn_ass_subtitle(clip_path, ass_path, out_path)
+        burn_ass_subtitle(
+            clip_path, 
+            ass_path, 
+            out_path, 
+            ratio=payload.ratio,
+            custom_bgm_file=payload.bgm # Pass Custom BGM
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {"url": f"/files/clips_subtitled/{out_name}", "ass": f"/files/ass/{ass_name}"}
+    return {"url": f"/files/clips_subtitled/{out_name}"}

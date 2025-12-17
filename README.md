@@ -1,97 +1,112 @@
 <div align="center">
 
-# 🎬 AI Video Editor Studio
+<!-- ================= HERO ================= -->
 
-⚡ **AI-Powered Automated Video Editing Platform**  
-✂️ Auto Clips • 🧠 AI Reasoning • 🧩 Timeline Subtitle Editor • 🔥 Kinetic Subtitle
+# ⚡ AI VIDEO EDITOR STUDIO ⚡  
+### _Cyberpunk AI Video Repurposing Engine_
 
----
+> **Turn long videos into viral Shorts.**  
+> Powered by AI. Rendered by FFmpeg. Built for domination.
 
-![status](https://img.shields.io/badge/status-active-success)
-![backend](https://img.shields.io/badge/backend-FastAPI-009688)
-![frontend](https://img.shields.io/badge/frontend-TailwindCSS-38BDF8)
-![ai](https://img.shields.io/badge/AI-Whisper%20%7C%20DeepSeek%20%7C%20Qwen-purple)
-![video](https://img.shields.io/badge/video-FFmpeg-red)
-![license](https://img.shields.io/badge/license-MIT-blue)
+<br/>
+
+<img src="https://img.shields.io/badge/STATUS-ACTIVE-00ff9c?style=for-the-badge">
+<img src="https://img.shields.io/badge/BACKEND-FastAPI-0a0f1c?style=for-the-badge&logo=fastapi">
+<img src="https://img.shields.io/badge/FRONTEND-TailwindCSS-0a0f1c?style=for-the-badge&logo=tailwindcss">
+<img src="https://img.shields.io/badge/AI-Whisper%20%7C%20DeepSeek%20%7C%20Qwen-7c3aed?style=for-the-badge">
+<img src="https://img.shields.io/badge/VIDEO-FFmpeg-ff003c?style=for-the-badge">
+<img src="https://img.shields.io/badge/LICENSE-MIT-1f2937?style=for-the-badge">
 
 </div>
 
 ---
 
-## 🧠 Tentang Project
+## 🖥️ SYSTEM INTERFACE (LIVE PREVIEW)
 
-**AI Video Editor Studio** adalah aplikasi **video editing berbasis AI** yang dibuat untuk **content creator modern**  
-(TikTok, Instagram Reels, YouTube Shorts, YouTube).
-
-Bukan sekadar auto-cut, sistem ini:
-- Memahami **isi video**
-- Mendeteksi **momen paling engaging**
-- Menghasilkan **clip siap upload**
-- Menyediakan **timeline subtitle editor**
-- Mendukung **kinetic subtitle (burn-in)**
-
-🎯 Fokus utama:
-> **Cepat • Presisi • Bisa diedit manual • Siap produksi**
+<p align="center">
+  <img src="dokumentasi/contoh.png" alt="AI Video Editor Studio Cyberpunk UI" width="95%">
+</p>
 
 ---
 
-## ✨ Fitur Utama
+## 🧠 WHAT IS THIS?
 
-### 🎥 Video Processing
-- Upload video lokal (MP4, MOV, AVI)
-- Audio extraction otomatis
-- Video rendering via FFmpeg
+**AI Video Editor Studio** adalah **mesin auto-edit video berbasis AI**  
+yang dirancang untuk **mengubah video panjang menjadi short-form content**  
+tanpa workflow ribet, tanpa editing manual berjam-jam.
 
-### 🧠 AI Intelligence
-- **Whisper** → Speech-to-Text (transcript)
-- **DeepSeek** → Reasoning & highlight detection
-- **Qwen** → Hook & narasi clip
+Ini **bukan editor biasa**.  
+Ini **AI-powered video weapon**.
 
-### ✂️ AI Auto Clip Generator
-- Pemilihan momen terbaik otomatis
-- Durasi fleksibel (15–60 detik)
-- Skor kualitas setiap clip
+---
 
-### 🧩 Timeline Subtitle Editor
+## 🎯 USE CASE
+
+- Content creator (TikTok / Reels / Shorts)
+- Podcast → clip viral
+- Agency / tim konten
+- Editing cepat + konsisten + scalable
+
+---
+
+## ⚙️ CORE FEATURES
+
+### 🧠 AI BRAIN
+- **Whisper** → speech-to-text
+- **DeepSeek** → deteksi momen penting (hook, impact, emosi)
+- **Qwen** → bantu narasi & konteks
+
+### ✂️ AUTO CLIP ENGINE
+- Potong momen terbaik otomatis
+- Durasi short-friendly
+- Skor kualitas tiap clip
+
+### 🧩 SUBTITLE TIMELINE
 - Edit subtitle per baris
-- Atur start / end time manual
-- Reorder subtitle
+- Kontrol start / end time
 - Preview sebelum render
 
-### 🔥 Kinetic Subtitle
-- Generate subtitle format **ASS**
-- Burn subtitle langsung ke video
-- Style subtitle cinematic & modern
+### 🔥 CYBER SUBTITLE (ASS)
+- Subtitle cinematic
+- Burn-in langsung ke video
+- Tampilan modern / kinetic style
 
-### 🎨 UI Modern
-- Glassmorphism
-- TailwindCSS
-- Animasi halus
-- Modal timeline editor
+### 🎥 VIDEO PIPELINE
+- Rendering via FFmpeg
+- Output siap upload
+- Stabil untuk produksi konten
 
 ---
 
-## 🏗️ Arsitektur Project
+## 🧬 WORKFLOW
 
-```
+```txt
+UPLOAD VIDEO
+     ↓
+AI TRANSCRIBE
+     ↓
+AI DETECT MOMENTS
+     ↓
+AUTO CLIP
+     ↓
+SUBTITLE EDIT
+     ↓
+RENDER FINAL
+     ↓
+UPLOAD & DOMINATE
+````
 
+---
+
+## 🏗️ PROJECT STRUCTURE
+
+```txt
 ai-video-editor/
 │
 ├── app/
 │   ├── api/
-│   │   ├── routes.py
-│   │   └── endpoints/
-│   │       ├── upload.py
-│   │       ├── transcribe.py
-│   │       ├── megallm_clips.py
-│   │       └── subtitle.py
-│   │
 │   ├── core/
-│   │   ├── ai_logic.py
-│   │   └── video_pipeline.py
-│   │
 │   └── utils/
-│       └── helpers.py
 │
 ├── static/
 │   └── index.html
@@ -101,33 +116,32 @@ ai-video-editor/
 │   ├── transcripts/
 │   ├── clips/
 │   ├── ass/
-│   └── final/
+│   └── clips_subtitled/
+│
+├── dokumentasi/
+│   └── contoh.png
 │
 ├── main.py
 ├── requirements.txt
 └── README.md
-
-````
+```
 
 ---
 
-## 🚀 Cara Menjalankan (Local Development)
+## 🛠️ INSTALLATION (LOCAL)
 
-### 1️⃣ Clone Repository
+### 1️⃣ CLONE
+
 ```bash
 git clone https://github.com/gempurbudianarki/ai-Clipper-vidio.git
 cd ai-video-editor
-````
+```
 
----
-
-### 2️⃣ Buat Virtual Environment
+### 2️⃣ VIRTUAL ENV
 
 ```bash
 python -m venv venv
 ```
-
-Aktifkan:
 
 **Windows**
 
@@ -141,9 +155,7 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
----
-
-### 3️⃣ Install Python Dependencies
+### 3️⃣ DEPENDENCIES
 
 ```bash
 pip install -r requirements.txt
@@ -151,32 +163,24 @@ pip install -r requirements.txt
 
 ---
 
-## ⚠️ PENTING — Install FFmpeg (WAJIB)
+## ⚠️ FFmpeg (MANDATORY)
 
-FFmpeg digunakan untuk:
-
-* Cutting video
-* Rendering clip
-* Burn subtitle ASS
-* Encoding video final
-
-Cek apakah sudah ter-install:
+Check:
 
 ```bash
 ffmpeg -version
 ```
 
-### Install FFmpeg
+Install if missing:
 
 **Windows**
 
-* Download: [https://www.gyan.dev/ffmpeg/builds/](https://www.gyan.dev/ffmpeg/builds/)
-* Tambahkan folder `ffmpeg/bin` ke **PATH**
+* Download FFmpeg
+* Add `ffmpeg/bin` to PATH
 
-**Linux (Ubuntu / Debian)**
+**Linux**
 
 ```bash
-sudo apt update
 sudo apt install ffmpeg
 ```
 
@@ -186,17 +190,17 @@ sudo apt install ffmpeg
 brew install ffmpeg
 ```
 
-> ❗ Tanpa FFmpeg, fitur clip & subtitle **TIDAK akan jalan**
+> No FFmpeg = No Render = No Mercy.
 
 ---
 
-### 4️⃣ Jalankan Server
+## ▶️ RUN SERVER
 
 ```bash
 uvicorn main:app --reload
 ```
 
-Buka di browser:
+Open:
 
 ```
 http://127.0.0.1:8000
@@ -204,74 +208,19 @@ http://127.0.0.1:8000
 
 ---
 
-## 🖥️ Alur Penggunaan Aplikasi
+## 📦 OUTPUT ZONES
 
-1️⃣ Upload Video
-2️⃣ Transcribe Audio (Whisper)
-3️⃣ Generate AI Clips
-4️⃣ Pilih Clip Terbaik
-5️⃣ Edit Subtitle di Timeline
-6️⃣ Render Subtitle (Burn-in)
-7️⃣ Download Video Final
-
----
-
-## 📦 Struktur Output
-
-| Folder         | Fungsi                    |
-| -------------- | ------------------------- |
-| `uploads/`     | Video asli                |
-| `transcripts/` | Hasil transkripsi Whisper |
-| `clips/`       | Clip hasil AI             |
-| `ass/`         | Subtitle ASS              |
-| `final/`       | Video final               |
+| Folder             | Function      |
+| ------------------ | ------------- |
+| `uploads/`         | Raw video     |
+| `transcripts/`     | AI transcript |
+| `clips/`           | Auto clips    |
+| `ass/`             | Subtitle      |
+| `clips_subtitled/` | Final output  |
 
 ---
 
-## 🧰 Teknologi yang Digunakan
-
-| Layer        | Teknologi             |
-| ------------ | --------------------- |
-| Backend      | FastAPI               |
-| AI STT       | Whisper               |
-| AI Reasoning | DeepSeek              |
-| AI Language  | Qwen                  |
-| Video        | FFmpeg                |
-| Subtitle     | ASS                   |
-| Frontend     | HTML, TailwindCSS, JS |
-| Server       | Uvicorn               |
-
----
-
-## ⚠️ Catatan
-
-* Project masih **aktif dikembangkan**
-* Beberapa AI logic masih **eksperimental**
-* Disarankan:
-
-  * RAM ≥ 8GB
-  * Storage cukup (video besar)
-
----
-
-## 🛣️ Roadmap
-
-* [ ] Realtime progress (WebSocket)
-* [ ] Preset TikTok / IG / YouTube
-* [ ] Music beat sync
-* [ ] Multi-language subtitle
-* [ ] Docker support
-
----
-
-## 🤝 Kontribusi
-
-Pull request sangat terbuka.
-Fork → eksplor → improve → PR 🚀
-
----
-
-## 📄 Lisensi
+## 📄 LICENSE
 
 MIT License
 
@@ -279,10 +228,12 @@ MIT License
 
 <div align="center">
 
-🔥 **Built for creators. Designed for scale.**
-🚀 *AI Video Editor Studio*
+## 🧑‍💻 BUILT BY
+
+# **GEMPUR BUDI ANARKI**
+
+⚡ *AI is the tool.*
+🔥 *Code is the weapon.*
+🖤 *Content domination is the goal.*
 
 </div>
-```
-
----
